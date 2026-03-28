@@ -1,0 +1,70 @@
+Provider Directory
+- Grey, Meredith
+  - certification: MD
+  - specialty: Primary Care
+  - department:
+    - name: Sloan Primary Care
+    - phone: (710) 555-2070
+    - address: 202 Maple St, Winston-Salem, NC 27101
+    - hours: M-F 9am-5pm
+- House, Gregory
+  - certification: MD
+  - specialty: Orthopedics
+  - department:
+    - name: PPTH Orthopedics
+    - phone: (445) 555-6205
+    - address: 101 Pine St, Greensboro, NC 27401
+    - hours: M-W 9am-5pm
+  - department:
+    - name: Jefferson Hospital
+    - phone: (215) 555-6123
+    - address: 202 Maple St, Claremont, NC 28610
+    - hours: Th-F 9am-5pm
+- Yang, Cristina
+  - certification: MD
+  - specialty: Surgery
+  - department:
+    - name: Seattle Grace Cardiac Surgery
+    - phone: (710) 555-3082
+    - address: 456 Elm St, Charlotte, NC 28202
+    - hours: M-F 9am-5pm
+- Perry, Chris
+  - certification: FNP
+  - specialty: Primary Care
+  - department:
+    - name: Sacred Heart Surgical Department
+    - phone: (339) 555-7480
+    - address: 123 Main St, Raleigh, NC 27601
+    - hours: M-W 9am-5pm
+Brennan, Temperance
+  - certification: PhD, MD
+  - specialty: Orthopedics
+  - department:
+    - name: Jefferson Hospital
+    - phone: (215) 555-6123
+    - address: 202 Maple St, Claremont, NC 28610
+    - hours: Tu-Th 10am-4pm
+
+Appointments:
+  Times:
+    - appointments can only be booked within office hours
+    - 
+  Types:
+    - NEW appointment is 30 minutes long, ESTABLISHED appointment is 15 minutes long
+    - An appointment is ESTABLISHED if the patient has been seen the provider in the least 5 years
+    - otherwise the appointment type is NEW
+  Arrival:
+    - New patients should arrive 30 minutes early
+    - Establish patients are encouraged to arrive 10 minutes before appointment
+
+Accepted Insurances:
+- Medicaid
+- United Health Care
+- Blue Cross Blue Shield of North Carolina
+- Aetna
+- Cigna
+
+Self-pay:
+- Primary Care: $150
+- Orthopedics: $300
+- Surgery: $1000
