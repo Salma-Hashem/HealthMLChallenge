@@ -20,7 +20,7 @@ from guardrails import (
     sanitize_output, verify_booking_in_response,
 )
 from prompts import SYSTEM_PROMPT
-from tools import TOOLS, execute_tool, get_openai_tools
+from tools import registry, executor as tool_executor
 from workflow import (
     WorkflowState, create_session, add_referral, transition_to,
 )
@@ -86,7 +86,7 @@ def handle_message(
 
     # 4. Tool-calling loop
     client = get_client()
-    openai_tools = get_openai_tools()
+    openai_tools = registry.get_openai_tools()
     tool_call_count = 0
     final_text = ""
     last_confirmed_booking: Optional[str] = None
@@ -158,7 +158,7 @@ def handle_message(
             if not allowed:
                 result = {"error": f"Action not allowed: {reason}"}
             else:
-                result_str = execute_tool(name, args, db, session)
+                result_str = tool_executor.run(name, args, db, session)
                 _log_tool_call(name, args, result_str)
                 _update_state(name, result_str, session, sessions)
                 try:
