@@ -1,6 +1,7 @@
 import pytest
 
-from app import app as flask_app, db
+from main import app as flask_app, db
+from agent.orchestrator import _build_response
 
 
 @pytest.fixture()
@@ -14,7 +15,7 @@ def client():
 
 class TestHealthcheck:
     def test_ok(self, client):
-        resp = client.get("/")
+        resp = client.get("/api/health")
         assert resp.status_code == 200
         assert resp.get_json()["status"] == "ok"
 
@@ -267,33 +268,24 @@ class TestBookingAPI:
         assert resp.status_code == 400
 
 
-# ---------- Session / workflow API ----------
+# ---------- Workflow state format (BookingChecklist) ----------
 
-class TestSessionAPI:
-    def test_create_session(self, client):
-        resp = client.post("/api/session")
-        assert resp.status_code == 201
-        data = resp.get_json()
-        assert data["state"] == "greet"
-        assert "session_id" in data
+class TestWorkflowStateFormat:
+    """Ensure workflow_state is always returned as UPPERCASE so the React
+    BookingChecklist can match it against its WORKFLOW_STEPS constants."""
 
-    def test_get_session(self, client):
-        resp = client.post("/api/session")
-        sid = resp.get_json()["session_id"]
-        resp = client.get(f"/api/session/{sid}")
-        assert resp.status_code == 200
-        assert resp.get_json()["state"] == "greet"
+    def test_default_state_is_uppercase(self):
+        result = _build_response("sid", {}, "hello")
+        assert result["workflow_state"] == result["workflow_state"].upper()
 
-    def test_advance_from_greet(self, client):
-        resp = client.post("/api/session")
-        sid = resp.get_json()["session_id"]
-        resp = client.post(f"/api/session/{sid}/advance")
-        assert resp.status_code == 200
-        assert resp.get_json()["state"] == "verify_patient"
+    def test_lowercase_state_is_uppercased(self):
+        result = _build_response("sid", {"workflow_state": "verify_patient"}, "hello")
+        assert result["workflow_state"] == "VERIFY_PATIENT"
 
-    def test_advance_blocked_without_data(self, client):
-        resp = client.post("/api/session")
-        sid = resp.get_json()["session_id"]
-        client.post(f"/api/session/{sid}/advance")  # → verify_patient
-        resp = client.post(f"/api/session/{sid}/advance")
-        assert resp.status_code == 400
+    def test_all_known_states_are_uppercased(self):
+        from core.workflow import WorkflowState
+        for state in WorkflowState:
+            result = _build_response("sid", {"workflow_state": state.value}, "hi")
+            assert result["workflow_state"] == result["workflow_state"].upper(), (
+                f"workflow_state '{state.value}' was not uppercased in API response"
+            )

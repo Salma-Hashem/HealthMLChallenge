@@ -27,7 +27,7 @@ import pytest
 # the tests/ directory.
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from data_loader import (
+from data.loader import (
     _extract_provider_blocks,
     _build_provider,
     parse_providers,
@@ -39,7 +39,7 @@ from data_loader import (
 # Helpers
 # ---------------------------------------------------------------------------
 
-DATA_SHEET = os.path.join(os.path.dirname(__file__), "..", "data_sheet.txt")
+DATA_SHEET = os.path.join(os.path.dirname(__file__), "..", "data", "data_sheet.txt")
 
 
 def _lines(*text: str):

@@ -6,7 +6,7 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - .env                    # GOOGLE_API_KEY and other vars — never baked in
+      - .env                    # CEREBRAS_API_KEY and other vars — never baked in
     environment:
       - FLASK_ENV=production
     healthcheck:

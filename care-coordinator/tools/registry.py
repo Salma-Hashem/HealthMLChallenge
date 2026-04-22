@@ -55,7 +55,7 @@ class ToolRegistry:
     # ------------------------------------------------------------------ #
 
     def get_openai_tools(self) -> list[dict]:
-        """Return all tools in OpenAI function-calling format (Groq/Cerebras compatible)."""
+        """Return all tools in OpenAI function-calling format (Cerebras compatible)."""
         result = []
         for tool in self._tools.values():
             schema = dict(tool.schema)

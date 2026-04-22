@@ -1,7 +1,7 @@
-export default function SessionSummary({ workflowState, onReset }) {
+export default function SessionSummary({ workflowState, loading, onReset }) {
   const isDone = workflowState === 'BOOKING_CONFIRMED' || workflowState === 'FINAL_SUMMARY'
 
-  if (!isDone) return null
+  if (!isDone || loading) return null
 
   return (
     <div className="mx-4 mb-3 bg-green-50 border border-green-200 rounded-xl p-4">

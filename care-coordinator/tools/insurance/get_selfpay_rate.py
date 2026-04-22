@@ -7,6 +7,7 @@ insurance is not accepted so the nurse can inform them of out-of-pocket costs.
 
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import GetSelfpayRateArgs, schema_for
 
 
 class GetSelfpayRateTool(BaseTool):
@@ -15,16 +16,7 @@ class GetSelfpayRateTool(BaseTool):
         "Get the self-pay cost for a medical specialty. "
         "Use when insurance is not accepted so the nurse knows out-of-pocket costs."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "specialty": {
-                "type": "string",
-                "description": "Medical specialty (e.g. 'Orthopedics', 'Primary Care', 'Surgery')",
-            },
-        },
-        "required": ["specialty"],
-    }
+    schema = schema_for(GetSelfpayRateArgs)
     requires_patient_verification = False
 
     def execute(self, args: dict, db: dict, session: dict) -> dict:

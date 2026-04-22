@@ -9,10 +9,11 @@ confirmation number, and advances the session referral state.
 import uuid
 from typing import Optional
 
-from models import Appointment
-from policy_engine import get_arrival_instructions, validate_booking_request
+from core.models import Appointment
+from core.policy import get_arrival_instructions, validate_booking_request
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import BookAppointmentArgs, schema_for
 
 
 def _active_referral(session: dict) -> Optional[dict]:
@@ -28,29 +29,7 @@ class BookAppointmentTool(BaseTool):
         "ONLY call this after the nurse says 'yes', 'confirm', 'book it', or similar. "
         "This action is irreversible — it marks the slot as taken and issues a confirmation number."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "patient_id": {
-                "type": "integer",
-                "description": "Patient ID from verify_patient",
-            },
-            "slot_id": {
-                "type": "string",
-                "description": "Slot ID from find_available_slots",
-            },
-            "appointment_type": {
-                "type": "string",
-                "description": "Appointment type from get_booking_history: 'NEW' or 'ESTABLISHED'",
-                "enum": ["NEW", "ESTABLISHED"],
-            },
-            "reason": {
-                "type": "string",
-                "description": "Brief reason for the visit (e.g. 'Orthopedics referral post-discharge')",
-            },
-        },
-        "required": ["patient_id", "slot_id", "appointment_type"],
-    }
+    schema = schema_for(BookAppointmentArgs)
     requires_patient_verification = True
 
     def execute(self, args: dict, db: dict, session: dict) -> dict:

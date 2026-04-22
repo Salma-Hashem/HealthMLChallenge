@@ -36,4 +36,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   || exit 1
 
 # Start gunicorn with 2 workers
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120"]
+CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120"]

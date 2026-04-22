@@ -2,7 +2,7 @@
 
 import pytest
 
-from guardrails import (
+from safety.guardrails import (
     InputBlocked,
     MAX_MESSAGE_LENGTH,
     check_input,
@@ -14,7 +14,7 @@ from guardrails import (
 
 
 # ---------------------------------------------------------------------------
-# Issue #22 — Input guardrails
+# Input guardrails
 # ---------------------------------------------------------------------------
 
 class TestInputLength:
@@ -77,7 +77,7 @@ class TestBlockedMessage:
 
 
 # ---------------------------------------------------------------------------
-# Issue #23 — Output guardrails
+# Output guardrails
 # ---------------------------------------------------------------------------
 
 class TestOutputScan:
@@ -133,12 +133,12 @@ class TestOutputScan:
 class TestSanitizeOutput:
     def test_clean_output_unchanged(self):
         text = "Your appointment is booked."
-        from guardrails import OutputFlag
+        from safety.guardrails import OutputFlag
         flag = OutputFlag()
         assert sanitize_output(text, flag) == text
 
     def test_ssn_redacted(self):
-        from guardrails import OutputFlag
+        from safety.guardrails import OutputFlag
         flag = OutputFlag()
         flag.add("ssn_pattern")
         text = "SSN: 123-45-6789 on file."
@@ -147,7 +147,7 @@ class TestSanitizeOutput:
         assert "[REDACTED-SSN]" in result
 
     def test_mrn_redacted(self):
-        from guardrails import OutputFlag
+        from safety.guardrails import OutputFlag
         flag = OutputFlag()
         flag.add("mrn_pattern")
         text = "MRN: 12345678 found."
@@ -156,7 +156,7 @@ class TestSanitizeOutput:
         assert "[REDACTED-MRN]" in result
 
     def test_disclaimer_appended_once(self):
-        from guardrails import OutputFlag
+        from safety.guardrails import OutputFlag
         flag = OutputFlag()
         flag.add("dosage_advice")
         text = "Take 10 mg daily."
@@ -164,7 +164,7 @@ class TestSanitizeOutput:
         assert result.count("clinical staff") == 1
 
     def test_disclaimer_not_duplicated(self):
-        from guardrails import OutputFlag
+        from safety.guardrails import OutputFlag
         flag = OutputFlag()
         flag.add("dosage_advice")
         text = "Take 10 mg daily."

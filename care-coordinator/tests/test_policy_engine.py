@@ -1,7 +1,7 @@
 import pytest
 from datetime import date, time, datetime, timedelta
 
-from policy_engine import (
+from core.policy import (
     determine_appointment_type,
     get_appointment_duration,
     get_arrival_instructions,
@@ -9,7 +9,7 @@ from policy_engine import (
     validate_slot_within_office_hours,
     validate_booking_request,
 )
-from models import OfficeHours, Slot, Patient, Appointment
+from core.models import OfficeHours, Slot, Patient, Appointment
 
 
 # ---------- determine_appointment_type ----------
@@ -129,7 +129,7 @@ class TestValidateBookingRequest:
             OfficeHours(day_of_week=i, open_time=time(9, 0), close_time=time(17, 0))
             for i in range(5)
         ]
-        from models import Department
+        from core.models import Department
         dept = Department(id=1, name="Test", phone="", address="", hours=hours)
         departments = {1: dept}
         providers = {}

@@ -1,4 +1,4 @@
-"""Tests for audit_log.py — Issue #24."""
+"""Tests for the append-only audit log (safety/audit.py)."""
 
 import hashlib
 import json
@@ -8,7 +8,7 @@ import uuid
 
 import pytest
 
-import audit_log
+from safety import audit as audit_log
 
 
 # ---------------------------------------------------------------------------
@@ -38,7 +38,7 @@ def tmp_log(tmp_path, monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Issue #24 acceptance criteria
+# Audit log correctness
 # ---------------------------------------------------------------------------
 
 class TestLogFormat:

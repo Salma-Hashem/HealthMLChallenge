@@ -8,6 +8,7 @@ provider practices.
 
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import CheckProviderAvailabilityArgs, schema_for
 
 
 class CheckProviderAvailabilityTool(BaseTool):
@@ -17,16 +18,7 @@ class CheckProviderAvailabilityTool(BaseTool):
         "and contact info. Use to understand when and where a provider is available "
         "before searching for slots."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "provider_id": {
-                "type": "integer",
-                "description": "Provider ID",
-            },
-        },
-        "required": ["provider_id"],
-    }
+    schema = schema_for(CheckProviderAvailabilityArgs)
     requires_patient_verification = True
 
     def execute(self, args: dict, db: dict, session: dict) -> dict:
@@ -41,7 +33,7 @@ class CheckProviderAvailabilityTool(BaseTool):
                 "name": d.name,
                 "address": d.address,
                 "phone": d.phone,
-                "hours": [oh.to_dict() for oh in d.hours],
+                "hours": [oh.model_dump() for oh in d.hours],
             }
             for d in p.departments
         ]

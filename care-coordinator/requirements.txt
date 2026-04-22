@@ -4,5 +4,20 @@ openai>=1.50.0
 python-dotenv==1.2.1
 gunicorn==23.0.0
 
+# Data validation
+pydantic>=2.0
+
+# LangGraph agent framework
+# - langgraph: StateGraph, MemorySaver checkpointer, conditional edges
+# - langchain-openai: ChatOpenAI compatible with Cerebras API
+# - langchain-core: Messages, StructuredTool (schema generation only)
+langgraph>=0.6
+langchain-openai>=0.3
+langchain-core>=0.3
+
+# LLM evaluation and tracing (langsmith is a transitive dep of langchain-core;
+# pinning here makes it explicit and prevents surprise version jumps)
+langsmith>=0.4
+
 # Testing
 pytest==8.4.2

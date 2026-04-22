@@ -97,7 +97,7 @@ export default function App() {
         />
 
         {/* Session summary (shows when booking is done) */}
-        <SessionSummary workflowState={workflowState} onReset={reset} />
+        <SessionSummary workflowState={workflowState} loading={loading} onReset={reset} />
 
         {/* Booking confirmation card */}
         <BookingCard requiresConfirmation={requiresConfirmation} onSend={send} />

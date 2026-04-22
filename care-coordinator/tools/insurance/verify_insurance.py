@@ -8,6 +8,7 @@ canonical plan name before the acceptance check runs.
 
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import VerifyInsuranceArgs, schema_for
 
 # ---------------------------------------------------------------------------
 # Alias table — maps lowercase abbreviations/variants to canonical plan names
@@ -71,19 +72,7 @@ class VerifyInsuranceTool(BaseTool):
         "Check whether a patient's insurance plan is accepted by the hospital. "
         "If not accepted, self-pay rates are returned so the nurse can be informed."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "plan_name": {
-                "type": "string",
-                "description": (
-                    "Insurance plan name as stated by the nurse "
-                    "(e.g. 'BCBS', 'Blue Cross Blue Shield of NC', 'Aetna', 'Cigna')"
-                ),
-            },
-        },
-        "required": ["plan_name"],
-    }
+    schema = schema_for(VerifyInsuranceArgs)
     requires_patient_verification = False
 
     def execute(self, args: dict, db: dict, session: dict) -> dict:

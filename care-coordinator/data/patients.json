@@ -1,0 +1,42 @@
+{
+  "patients": [
+    {
+      "id": 1,
+      "first_name": "John",
+      "last_name": "Doe",
+      "dob": "1975-01-01",
+      "pcp": "Dr. Meredith Grey",
+      "ehr_id": "1234abcd",
+      "referred_providers": [
+        {
+          "provider_name": "House, Gregory MD",
+          "specialty": "Orthopedics",
+          "provider_id": 2
+        },
+        {
+          "specialty": "Primary Care",
+          "provider_name": null,
+          "provider_id": null
+        }
+      ]
+    }
+  ],
+  "appointments": [
+    {
+      "id": 1, "patient_id": 1, "provider_id": 1,
+      "date": "2018-03-05", "time": "09:15:00", "status": "completed"
+    },
+    {
+      "id": 2, "patient_id": 1, "provider_id": 2,
+      "date": "2024-08-12", "time": "14:30:00", "status": "completed"
+    },
+    {
+      "id": 3, "patient_id": 1, "provider_id": 1,
+      "date": "2024-09-17", "time": "10:00:00", "status": "noshow"
+    },
+    {
+      "id": 4, "patient_id": 1, "provider_id": 1,
+      "date": "2024-11-25", "time": "11:30:00", "status": "cancelled"
+    }
+  ]
+}

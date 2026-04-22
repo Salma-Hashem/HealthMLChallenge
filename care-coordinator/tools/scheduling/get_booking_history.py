@@ -5,7 +5,7 @@ Checks whether a patient has seen a specific provider before and returns
 the correct appointment type (NEW or ESTABLISHED) with required duration.
 """
 
-from policy_engine import (
+from core.policy import (
     determine_appointment_type,
     get_appointment_duration,
     get_arrival_instructions,
@@ -13,6 +13,7 @@ from policy_engine import (
 )
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import GetBookingHistoryArgs, schema_for
 
 
 class GetBookingHistoryTool(BaseTool):
@@ -22,20 +23,7 @@ class GetBookingHistoryTool(BaseTool):
         "the correct appointment type (NEW or ESTABLISHED). "
         "ALWAYS call this before searching for slots — it tells you the required duration."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "patient_id": {
-                "type": "integer",
-                "description": "Patient ID returned by verify_patient",
-            },
-            "provider_id": {
-                "type": "integer",
-                "description": "Provider ID returned by lookup_provider_info",
-            },
-        },
-        "required": ["patient_id", "provider_id"],
-    }
+    schema = schema_for(GetBookingHistoryArgs)
     requires_patient_verification = True
 
     def execute(self, args: dict, db: dict, session: dict) -> dict:

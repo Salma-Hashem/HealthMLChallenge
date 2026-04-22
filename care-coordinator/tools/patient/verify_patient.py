@@ -9,6 +9,7 @@ from datetime import date
 
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import VerifyPatientArgs, schema_for
 
 
 class VerifyPatientTool(BaseTool):
@@ -18,24 +19,7 @@ class VerifyPatientTool(BaseTool):
         "ALWAYS call this first — before any patient-specific action. "
         "On success, updates the session so patient-specific tools become available."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "first_name": {
-                "type": "string",
-                "description": "Patient's first name (partial match supported)",
-            },
-            "last_name": {
-                "type": "string",
-                "description": "Patient's last name (partial match supported)",
-            },
-            "dob": {
-                "type": "string",
-                "description": "Date of birth in YYYY-MM-DD format (e.g. '1975-01-01')",
-            },
-        },
-        "required": [],
-    }
+    schema = schema_for(VerifyPatientArgs)
     requires_patient_verification = False
 
     def execute(self, args: dict, db: dict, session: dict) -> dict:
@@ -43,18 +27,26 @@ class VerifyPatientTool(BaseTool):
         last = args.get("last_name", "").strip().lower()
         dob_str = args.get("dob", "").strip()
 
+        if not dob_str:
+            return {
+                "found": False,
+                "message": "Date of birth is required to verify a patient. Please provide first name, last name, and date of birth.",
+            }
+
         matches = []
         for p in db["patients"].values():
             if first and first not in p.first_name.lower():
                 continue
             if last and last not in p.last_name.lower():
                 continue
-            if dob_str:
-                try:
-                    if p.dob != date.fromisoformat(dob_str):
-                        continue
-                except ValueError:
-                    pass
+            try:
+                if p.dob != date.fromisoformat(dob_str):
+                    continue
+            except ValueError:
+                return {
+                    "found": False,
+                    "message": f"Invalid date of birth format: '{dob_str}'. Use YYYY-MM-DD.",
+                }
             matches.append(p)
 
         if not matches:
@@ -72,7 +64,6 @@ class VerifyPatientTool(BaseTool):
             "patient_id": p.id,
             "name": f"{p.first_name} {p.last_name}",
             "dob": p.dob.isoformat(),
-            "insurance": p.insurance,
             "referrals": [
                 {
                     "specialty": r.specialty,

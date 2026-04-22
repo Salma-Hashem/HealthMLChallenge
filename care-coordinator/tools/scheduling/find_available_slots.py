@@ -17,6 +17,7 @@ from typing import List, Optional, Tuple
 
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import FindAvailableSlotsArgs, schema_for
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -84,21 +85,20 @@ def _resolve_date_window(
 # ---------------------------------------------------------------------------
 
 def _filter_slots(
-    slots: dict,
+    slots,
     provider_id: int,
     date_from: datetime,
     date_to: datetime,
     location_id: Optional[int] = None,
     duration: Optional[int] = None,
 ) -> List:
-    """Filter the slot dictionary down to candidates that match all criteria.
+    """Filter slots down to candidates matching all criteria.
 
-    Only available slots within the date window for the given provider are
-    returned. location_id and duration are optional — omitting either widens
-    the search to all locations / all durations for that provider.
+    Accepts either the full db["slots"] dict or a pre-filtered list from
+    db["slots_by_provider"][provider_id] for O(1) provider lookups.
 
     Args:
-        slots:       db["slots"] dict keyed by slot ID.
+        slots:       db["slots"] dict OR db["slots_by_provider"][provider_id] list.
         provider_id: The provider whose slots are being searched.
         date_from:   Inclusive lower bound of the search window.
         date_to:     Inclusive upper bound of the search window.
@@ -108,21 +108,17 @@ def _filter_slots(
     Returns:
         Unsorted list of matching slot objects.
     """
+    slot_iter = slots if isinstance(slots, list) else slots.values()
     matching = []
-    for slot in slots.values():
-        # Skip slots that are already booked
+    for slot in slot_iter:
         if not slot.is_available:
             continue
-        # Must belong to the requested provider
         if slot.provider_id != provider_id:
             continue
-        # Optionally restrict to a specific location
         if location_id is not None and slot.department_id != location_id:
             continue
-        # Optionally restrict to a specific appointment duration
         if duration is not None and slot.duration_minutes != duration:
             continue
-        # Must fall within the requested date window
         if not (date_from <= slot.start <= date_to):
             continue
         matching.append(slot)
@@ -245,33 +241,7 @@ class FindAvailableSlotsTool(BaseTool):
         "Do NOT narrow the date range to match a time-of-day preference — "
         "filter the returned results instead."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "provider_id": {
-                "type": "integer",
-                "description": "Provider ID",
-            },
-            "location_id": {
-                "type": "integer",
-                "description": "Department/location ID (omit to search all locations for this provider)",
-            },
-            "duration": {
-                "type": "integer",
-                "description": "Required slot duration in minutes: 30 for NEW, 15 for ESTABLISHED",
-                "enum": [15, 30],
-            },
-            "date_from": {
-                "type": "string",
-                "description": "Start of search window in YYYY-MM-DD format (defaults to today)",
-            },
-            "date_to": {
-                "type": "string",
-                "description": f"End of search window in YYYY-MM-DD format (defaults to {DEFAULT_WINDOW_DAYS} days from today)",
-            },
-        },
-        "required": ["provider_id", "duration"],
-    }
+    schema = schema_for(FindAvailableSlotsArgs)
     requires_patient_verification = True
 
     def execute(self, args: dict, db: dict, session: dict) -> dict:
@@ -289,8 +259,9 @@ class FindAvailableSlotsTool(BaseTool):
 
         # --- Step 2: Filter the slot dictionary ------------------------------
         # Returns all available slots matching provider / location / duration / window.
+        provider_slots = db.get("slots_by_provider", {}).get(provider_id) or list(db["slots"].values())
         matching = _filter_slots(
-            db["slots"], provider_id, date_from, date_to,
+            provider_slots, provider_id, date_from, date_to,
             location_id=location_id,
             duration=duration,
         )
@@ -301,7 +272,7 @@ class FindAvailableSlotsTool(BaseTool):
         if not matching:
             if location_id is not None:
                 alternatives = _find_alternative_locations(
-                    db["slots"], db["departments"],
+                    provider_slots, db["departments"],
                     provider_id, location_id, date_from, date_to,
                     duration=duration,
                 )

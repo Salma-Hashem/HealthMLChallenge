@@ -8,9 +8,10 @@ and next available slots for instant "No, but..." routing.
 
 from datetime import date, datetime, timedelta
 
-from policy_engine import determine_appointment_type, get_last_seen_date
+from core.policy import determine_appointment_type, get_last_seen_date
 from tools.base import BaseTool
 from tools.registry import registry
+from tools.schemas import ListAlternativeProvidersArgs, schema_for
 
 
 class ListAlternativeProvidersTool(BaseTool):
@@ -22,32 +23,7 @@ class ListAlternativeProvidersTool(BaseTool):
         "(e.g. 'patient saw Dr. Jones in 2022') for each alternative — "
         "use this to give the nurse instant 'No, but...' alternatives."
     )
-    schema = {
-        "type": "object",
-        "properties": {
-            "specialty": {
-                "type": "string",
-                "description": "Medical specialty (e.g. 'Orthopedics', 'Primary Care')",
-            },
-            "exclude_provider_id": {
-                "type": "integer",
-                "description": "Provider ID to exclude (the unavailable provider)",
-            },
-            "patient_id": {
-                "type": "integer",
-                "description": (
-                    "Patient ID — when provided, includes whether the patient has "
-                    "seen each alternative provider before"
-                ),
-            },
-            "duration": {
-                "type": "integer",
-                "description": "Slot duration in minutes (15 or 30) — when provided, returns next available slots of that duration per provider",
-                "enum": [15, 30],
-            },
-        },
-        "required": ["specialty"],
-    }
+    schema = schema_for(ListAlternativeProvidersArgs)
     requires_patient_verification = False
 
     def execute(self, args: dict, db: dict, session: dict):
@@ -95,12 +71,14 @@ class ListAlternativeProvidersTool(BaseTool):
                     "appointment_type": appt_type,
                 }
 
-            # Next available slots
+            # Next available slots — use pre-built index for O(1) provider lookup
+            candidate_slots = db.get("slots_by_provider", {}).get(p.id) or [
+                s for s in db["slots"].values() if s.provider_id == p.id
+            ]
             provider_slots = sorted(
                 [
-                    s for s in db["slots"].values()
+                    s for s in candidate_slots
                     if s.is_available
-                    and s.provider_id == p.id
                     and (duration is None or s.duration_minutes == duration)
                     and date_from <= s.start <= date_to
                 ],
@@ -127,7 +105,7 @@ class ListAlternativeProvidersTool(BaseTool):
                 "found": False,
                 "message": f"No alternative providers found for specialty: {specialty}",
             }
-        return matches
+        return {"found": True, "alternatives": matches}
 
 
 registry.register(ListAlternativeProvidersTool())
